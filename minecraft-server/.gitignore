@@ -1,0 +1,10 @@
+*.jar
+eula.txt
+world*/
+logs/
+cache/
+crash-reports/
+libraries/
+versions/
+plugins/
+*.json

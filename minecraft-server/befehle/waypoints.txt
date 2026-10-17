@@ -1,0 +1,32 @@
+# ============================================================
+#  Waypoints & Warps für alle Spieler
+# ============================================================
+
+# ---------- 1) Warps (EssentialsX) – funktioniert für ALLE ----------
+# Stell dich IM SPIEL an den Ort und tippe:
+/setwarp spawn
+/setwarp shop
+/setwarp arena
+/setwarp event
+# Spieler sehen alle Warps mit /warp und teleportieren mit /warp shop
+# Spawnpunkt der Welt setzen (dort spawnen neue Spieler):
+/setworldspawn
+
+# ---------- 2) Marker auf der Web-Karte (BlueMap) ----------
+# Siehe README, Abschnitt "BlueMap-Marker". Die Marker erscheinen
+# auf der Online-Karte unter http://SERVER-IP:8100
+
+# ---------- 3) Waypoints in der Locator Bar (Vanilla, ab 1.21.6) ----------
+# Ein unsichtbarer Rüstungsständer wird als Waypoint angezeigt –
+# alle Spieler sehen ihn ohne Mods in der Leiste über der Hotbar.
+# Stell dich an den Ort und tippe (EXPERIMENTELL – bitte testen):
+/summon minecraft:armor_stand ~ ~ ~ {Tags:["waypoint"],Invisible:1b,Invulnerable:1b,NoGravity:1b,Marker:1b,attributes:[{id:"minecraft:waypoint_transmit_range",base:60000000}]}
+# Farbe ändern (für den zuletzt erstellten in der Nähe):
+/waypoint modify @e[type=armor_stand,tag=waypoint,limit=1,sort=nearest] color gold
+# Wieder entfernen:
+/kill @e[type=armor_stand,tag=waypoint,limit=1,sort=nearest]
+
+# ---------- 4) Minimap ----------
+# Spieler mit Lunar Client haben eine Minimap mit eigenen Waypoints.
+# Wer Mods nutzt: Xaero's Minimap (Fabric/NeoForge) – Waypoints kann
+# man dort per Chat mit anderen teilen.

@@ -1,0 +1,60 @@
+# ============================================================
+#  Ränge für euren Server (LuckPerms)
+#  Jede Zeile einzeln in die Server-Konsole kopieren
+#  (ohne "/" davor). Zeilen mit # sind nur Kommentare.
+# ============================================================
+
+# --- Gruppen anlegen ---
+lp creategroup sub
+lp creategroup mod
+lp creategroup admin
+
+# --- Vererbung: admin > mod > sub > default ---
+lp group sub parent add default
+lp group mod parent add sub
+lp group admin parent add mod
+
+# --- Präfixe in Chat & Tablist ---
+lp group default meta setprefix 10 "&7[Spieler] "
+lp group sub meta setprefix 20 "&d[Sub] "
+lp group mod meta setprefix 30 "&9[Mod] "
+lp group admin meta setprefix 40 "&c[Admin] "
+
+# --- Rechte für ALLE Spieler (default) ---
+lp group default permission set essentials.home true
+lp group default permission set essentials.sethome true
+lp group default permission set essentials.delhome true
+lp group default permission set essentials.tpa true
+lp group default permission set essentials.tpaccept true
+lp group default permission set essentials.tpdeny true
+lp group default permission set essentials.back true
+lp group default permission set essentials.warp true
+lp group default permission set essentials.warp.list true
+lp group default permission set essentials.msg true
+
+# --- Extras für Subs ---
+lp group sub permission set essentials.sethome.multiple true
+lp group sub permission set essentials.sethome.multiple.vip true
+lp group sub permission set essentials.chat.color true
+
+# --- Moderatoren ---
+lp group mod permission set essentials.kick true
+lp group mod permission set essentials.mute true
+lp group mod permission set essentials.tempban true
+lp group mod permission set essentials.tp true
+lp group mod permission set essentials.vanish true
+lp group mod permission set coreprotect.inspect true
+lp group mod permission set coreprotect.lookup true
+lp group mod permission set coreprotect.rollback true
+lp group mod permission set coreprotect.restore true
+lp group mod permission set griefprevention.ignoreclaims true
+
+# --- Admins dürfen alles ---
+lp group admin permission set * true
+
+# --- Euch beiden Admin geben (Namen ersetzen!) ---
+lp user DEIN_NAME parent set admin
+lp user NAME_VOM_KUMPEL parent set admin
+
+# --- Spieler zum Sub machen ---
+# lp user SPIELERNAME parent add sub
