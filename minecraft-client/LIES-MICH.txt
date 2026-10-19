@@ -1,0 +1,32 @@
+STREAM-SMP – Minecraft mit Shadern, Minimap und guten FPS
+==========================================================
+
+Was der Installer macht:
+  - Fabric Loader fuer Minecraft 26.3 installieren
+  - Mods: Fabric API, Sodium (mehr FPS), Iris (Shader), Xaero's Minimap
+  - Shader: Complementary Reimagined (wird automatisch eingeschaltet)
+  - Launcher-Profil "Stream-SMP (Fabric 26.3)" mit 4 GB RAM
+  - Sichtweite 10, V-Sync aus
+  - Alte Versionen dieser Mods landen in mods\_alte_mods
+  - Von options.txt und launcher_profiles.json wird vorher ein Backup gemacht
+
+SO GEHT'S:
+  1. Minecraft Launcher und Minecraft komplett SCHLIESSEN.
+  2. Diesen Ordner entpacken (Rechtsklick > Alle extrahieren).
+  3. "installieren.bat" doppelklicken.
+     (Wenn Windows warnt: "Weitere Informationen" > "Trotzdem ausfuehren")
+  4. Minecraft Launcher oeffnen, unten links "Stream-SMP (Fabric 26.3)" waehlen, SPIELEN.
+
+Mehr RAM (z. B. 6 GB):  In der Eingabeaufforderung:  installieren.bat -RamGB 6
+Andere Version:          installieren.bat -McVersion 26.3
+
+WENN ES RUCKELT:
+  - Optionen > Grafik > Shader Packs > Shader-Einstellungen > Profil "Low" oder "Potato"
+  - Schatten-Qualitaet runter
+  - Taste K schaltet Shader schnell an/aus (Iris)
+  - Beim Streamen in OBS den Encoder NVENC (Nvidia) bzw. AMF (AMD) nehmen, nicht x264
+
+WICHTIG: Der Server muss auch Minecraft 26.3 haben, sonst kommst du nicht drauf.
+
+Hinweis: Das ist fuer den normalen Minecraft Launcher, NICHT fuer Lunar Client.
+Lunar hat eigene FPS-Optimierungen und eine eigene Minimap eingebaut.
