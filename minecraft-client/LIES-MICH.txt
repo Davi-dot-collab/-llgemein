@@ -3,7 +3,8 @@ STREAM-SMP – Minecraft mit Shadern, Minimap und guten FPS
 
 Was der Installer macht:
   - Fabric Loader fuer Minecraft 26.3 installieren
-  - Mods: Fabric API, Sodium (mehr FPS), Iris (Shader), Xaero's Minimap
+  - Mods: Fabric API, Sodium (mehr FPS), Iris (Shader), Xaero's Minimap,
+           Simple Voice Chat (Proximity Voice Chat wie bei CraftAttack)
   - Shader: Complementary Reimagined (wird automatisch eingeschaltet)
   - Launcher-Profil "Stream-SMP (Fabric 26.3)" mit 4 GB RAM
   - Sichtweite 10, V-Sync aus
@@ -19,6 +20,11 @@ SO GEHT'S:
 
 Mehr RAM (z. B. 6 GB):  In der Eingabeaufforderung:  installieren.bat -RamGB 6
 Andere Version:          installieren.bat -McVersion 26.3
+
+VOICE CHAT:
+  - Taste V: Einstellungen (Mikrofon, Lautstaerke, Sprachaktivierung oder Push-to-Talk)
+  - Taste Caps Lock: Push-to-Talk (Standard)
+  - Funktioniert nur, wenn der Server das Voice-Chat-Plugin hat
 
 WENN ES RUCKELT:
   - Optionen > Grafik > Shader Packs > Shader-Einstellungen > Profil "Low" oder "Potato"

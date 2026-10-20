@@ -1,4 +1,4 @@
-﻿# Installiert Fabric + Sodium + Iris + Complementary Shader + Xaero's Minimap
+﻿# Installiert Fabric + Sodium + Iris + Complementary Shader + Xaero's Minimap + Simple Voice Chat
 # für den normalen Minecraft Launcher. Am einfachsten: installieren.bat doppelklicken.
 param(
     [string]$McVersion = "26.3",
@@ -41,7 +41,7 @@ if (Get-Process -Name 'MinecraftLauncher','Minecraft' -ErrorAction SilentlyConti
 New-Item -ItemType Directory -Force $Mods, $Shaders, $Config | Out-Null
 
 # Alte Versionen derselben Mods wegräumen (sonst stürzt das Spiel ab)
-$old = Get-ChildItem $Mods -Filter *.jar | Where-Object { $_.Name -match '^(fabric-api|sodium|iris|xaeros?)' }
+$old = Get-ChildItem $Mods -Filter *.jar | Where-Object { $_.Name -match '^(fabric-api|sodium|iris|xaeros?|voicechat)' }
 if ($old) {
     $bak = Join-Path $Mods '_alte_mods'
     New-Item -ItemType Directory -Force $bak | Out-Null
@@ -129,6 +129,7 @@ Install-FromModrinth 'fabric-api'      'fabric' $Mods 'fabric-api*.jar' | Out-Nu
 Install-FromModrinth 'sodium'          'fabric' $Mods 'sodium*.jar'     | Out-Null
 Install-FromModrinth 'iris'            'fabric' $Mods 'iris*.jar'       | Out-Null
 Install-FromModrinth 'xaeros-minimap'  'fabric' $Mods 'Xaeros_Minimap*.jar' | Out-Null
+Install-FromModrinth 'simple-voice-chat' 'fabric' $Mods 'voicechat*.jar'  | Out-Null
 
 Info "==> Lade Shader ..."
 $shaderFile = Install-FromModrinth 'complementary-reimagined' 'iris' $Shaders 'ComplementaryReimagined*.zip' $false
@@ -161,4 +162,5 @@ Write-Host ""
 Write-Host "FERTIG!" -ForegroundColor Green
 Write-Host "1. Minecraft Launcher oeffnen"
 Write-Host "2. Unten links das Profil 'Stream-SMP (Fabric $McVersion)' waehlen und SPIELEN"
-Write-Host "3. Wenn es ruckelt: Optionen > Grafik > Shader Packs > Shader-Einstellungen > Profil 'Low'"
+Write-Host "3. Voice Chat: Taste V oeffnet die Einstellungen (Mikrofon waehlen), Taste Caps Lock = Push-to-Talk"
+Write-Host "4. Wenn es ruckelt: Optionen > Grafik > Shader Packs > Shader-Einstellungen > Profil 'Low'"
