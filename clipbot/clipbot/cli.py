@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 from pathlib import Path
 
@@ -30,25 +31,34 @@ def cmd_run(a: argparse.Namespace) -> None:
     local = Path(a.source).exists() if a.source else False
     helix = None
     vod: dict = {}
+    have_keys = bool(os.environ.get("TWITCH_CLIENT_ID") and os.environ.get("TWITCH_CLIENT_SECRET"))
     if not local:
-        helix = twitch.Helix()
-        vod = helix.latest_vod(tw["channel"]) if a.latest else helix.vod(twitch.parse_vod_id(a.source) or "")
-        vod_id = vod["id"]
-        log(f"VOD {vod_id}: {vod.get('title', '')} ({vod.get('duration', '?')})")
+        if a.latest and not have_keys:
+            raise SystemExit("--latest braucht Twitch-Keys. Ohne Keys: VOD-URL angeben.")
+        vod_id = twitch.parse_vod_id(a.source) if a.source else None
+        if have_keys:
+            helix = twitch.Helix()
+            vod = helix.latest_vod(tw["channel"]) if a.latest else helix.vod(vod_id or "")
+            vod_id = vod["id"]
+        elif not vod_id:
+            raise SystemExit("Keine gueltige VOD-URL/ID oder Datei.")
+        else:
+            vod = {"id": vod_id}
+        log(f"VOD {vod_id}: {vod.get('title', '')}")
         src_audio = str(twitch.download_audio(vod_id, work))
     else:
         vod_id = a.vod_id or Path(a.source).stem
         src_audio = a.source
-        if a.vod_id and not a.no_twitch:
-            helix = twitch.Helix()
-            vod = helix.vod(a.vod_id)
+        if a.vod_id:
+            vod = {"id": a.vod_id}
+            helix = twitch.Helix() if have_keys else None
 
     log("Analysiere Audio ...")
     level = audio.loudness_per_second(src_audio)
     total = float(len(level))
 
     chat = None
-    if tw["use_chat"] and vod and not a.no_twitch:
+    if tw["use_chat"] and vod and not a.no_chat:
         try:
             log("Lade Chat-Replay ...")
             chat = detect.chat_rate(twitch.chat_timestamps(vod["id"]), len(level))
@@ -56,7 +66,7 @@ def cmd_run(a: argparse.Namespace) -> None:
         except Exception as e:  # inoffizielle Schnittstelle: nie hart scheitern
             log(f"Chat nicht verfuegbar ({e}); weiter ohne Chat.")
     offsets: list[float] = []
-    if tw["use_twitch_clips"] and helix and vod:
+    if tw["use_twitch_clips"] and helix and vod.get("user_id"):
         try:
             offsets = helix.vod_clip_offsets(vod)
             log(f"{len(offsets)} Zuschauer-Clips aus diesem VOD")
@@ -143,7 +153,7 @@ def main() -> None:
     r.add_argument("source", nargs="?", help="Twitch-VOD-URL/ID oder lokale Videodatei")
     r.add_argument("--latest", action="store_true", help="neuestes VOD des konfigurierten Kanals")
     r.add_argument("--vod-id", help="bei lokaler Datei: zugehoerige Twitch-VOD-ID (fuer Chat/Clips)")
-    r.add_argument("--no-twitch", action="store_true", help="keine Twitch-APIs (nur Audio-Analyse)")
+    r.add_argument("--no-chat", action="store_true", help="Chat-Replay nicht laden (nur Audio-Analyse)")
     r.add_argument("--count", type=int, default=None)
     r.add_argument("--workdir", default="work")
     r.add_argument("--out", default="out")

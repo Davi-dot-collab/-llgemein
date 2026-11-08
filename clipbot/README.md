@@ -26,7 +26,7 @@ export TIKTOK_CLIENT_KEY=... TIKTOK_CLIENT_SECRET=...     # developers.tiktok.co
 ```bash
 python -m clipbot run --latest                      # neuestes VOD des Kanals
 python -m clipbot run https://www.twitch.tv/videos/123456789 --count 8
-python -m clipbot run stream.mp4 --no-twitch        # lokale Datei, nur Audio-Analyse
+python -m clipbot run stream.mp4 --no-chat          # lokale Datei, nur Audio-Analyse
 
 python -m clipbot tiktok-auth --redirect-uri https://deine-seite.example/callback   # einmalig
 python -m clipbot upload out/123456789 --dry-run
