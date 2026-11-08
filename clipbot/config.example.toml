@@ -1,0 +1,43 @@
+# Kopieren nach config.toml und anpassen. Secrets kommen aus Umgebungsvariablen:
+#   TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, TIKTOK_CLIENT_KEY, TIKTOK_CLIENT_SECRET
+
+[twitch]
+channel = "gtasty"
+# Video-Format fuer die Clip-Abschnitte (yt-dlp -f)
+video_format = "720p60/720p/best[height<=720]/best"
+use_chat = true        # Chat-Replay (inoffiziell, faellt bei Fehlern still weg)
+use_twitch_clips = true
+
+[detect]
+weight_audio = 1.0     # Lautstaerke-Spitzen (Lachen, Schreien)
+weight_chat = 1.5      # Chat-Aktivitaet (KEKW, LUL, ...)
+weight_clip = 2.0      # von Zuschauern erstellte Twitch-Clips
+pre_roll = 22          # Sekunden vor dem Peak (Setup des Witzes)
+post_roll = 10         # Sekunden nach dem Peak
+min_len = 15
+max_len = 55
+min_gap = 90           # Mindestabstand zwischen zwei Clips in Sekunden
+clips_per_vod = 6
+overgenerate = 2.0     # so viele Kandidaten mehr transkribieren, dann neu ranken
+min_words_per_sec = 0.25
+hype_words = ["alter", "digga", "bruder", "nein", "was", "ey", "krass", "wtf", "lol", "haha", "ernsthaft", "brudi", "junge", "oh nein", "komm"]
+
+[transcribe]
+model = "small"        # tiny/base/small/medium/large-v3 (kleiner = schneller auf CPU)
+device = "cpu"         # "cuda" falls GPU vorhanden
+compute_type = "int8"  # cpu: int8, cuda: float16
+language = "de"
+
+[render]
+layout = "blur"        # "blur" = Gameplay mittig auf unscharfem Hintergrund, "facecam" = Cam oben / Game unten
+# nur fuer layout = "facecam": Facecam-Rechteck als Anteil des Bildes (0..1)
+facecam = { x = 0.0, y = 0.7, w = 0.25, h = 0.3 }
+subtitles = true
+font = "Arial"
+font_size = 76
+
+[tiktok]
+mode = "inbox"         # "inbox" = landet als Entwurf in der TikTok-App (empfohlen), "direct" = direkt posten
+privacy_level = "SELF_ONLY"  # bei direct; ohne TikTok-Audit sind nur private Posts erlaubt
+hashtags = ["#gtasty", "#gta", "#fyp", "#lustig"]
+title_template = "{title} {hashtags}"

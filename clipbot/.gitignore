@@ -1,0 +1,6 @@
+work/
+out/
+tokens.json
+config.toml
+__pycache__/
+*.pyc
