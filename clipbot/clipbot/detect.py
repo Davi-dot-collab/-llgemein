@@ -104,6 +104,30 @@ def make_candidates(score: np.ndarray, parts: dict, total: float, count: int, pr
     return out
 
 
+def speech_rate(c: Candidate) -> float:
+    dur = max(c.end - c.start, 1.0)
+    return sum(1 for w in c.words if c.start - c.section_start <= w[0] <= c.end - c.section_start) / dur
+
+
+def live_peak(audio_db: np.ndarray, chat: np.ndarray, t0: int, w_audio: float, w_chat: float,
+              thr: float, thr_audio_only: float, post_roll: float, min_gap: float,
+              last_peak: float, lookback: int = 90) -> tuple[float | None, float]:
+    """Live-Erkennung auf den letzten Minuten (Index i = Sekunde t0+i).
+    Ein Peak loest erst aus, wenn er `post_roll` Sekunden alt ist und danach nichts Hoeheres kam.
+    Gibt (absolute Peak-Zeit oder None, Peak-Score) zurueck."""
+    n = len(audio_db)
+    have_chat = chat is not None and float(np.sum(chat)) > 0
+    score, _ = combine(audio_db, chat if have_chat else None, [], w_audio, w_chat if have_chat else 0.0, 0.0)
+    sm = smooth(score, 7)
+    lo = max(0, n - lookback)
+    i = lo + int(np.argmax(sm[lo:]))
+    value = float(sm[i])
+    limit = thr if have_chat else thr_audio_only
+    if value < limit or i > n - post_roll or (t0 + i) - last_peak < min_gap:
+        return None, value
+    return float(t0 + i), value
+
+
 def text_rescore(c: Candidate, hype_words: list[str], min_words_per_sec: float) -> float:
     """Neu bewerten, nachdem der Abschnitt transkribiert wurde: Sprache + Ausrufe zaehlen."""
     dur = max(c.end - c.start, 1.0)

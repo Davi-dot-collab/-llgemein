@@ -8,7 +8,7 @@ from pathlib import Path
 
 import numpy as np
 
-from . import audio, config, detect, render, tiktok, twitch
+from . import audio, config, detect, render, twitch
 
 
 def log(msg: str) -> None:
@@ -105,43 +105,23 @@ def cmd_run(a: argparse.Namespace) -> None:
         render.render(str(section), rel_start, rel_end, dest, c.words, cfg["render"])
         manifest.append({"file": dest.name, "vod_start": round(c.start, 1), "vod_end": round(c.end, 1),
                          "score": round(c.score, 3), "signals": c.signals, "title": _title(c),
-                         "uploaded": False})
+                         })
     (out_dir / "manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False))
-    log(f"Fertig: {out_dir} ({len(manifest)} Clips). Titel in manifest.json anpassen, dann: clipbot upload {out_dir}")
+    log(f"Fertig: {out_dir} ({len(manifest)} Clips). Titel/Scores stehen in manifest.json.")
 
 
-def cmd_upload(a: argparse.Namespace) -> None:
+def cmd_live(a: argparse.Namespace) -> None:
+    from . import live
     cfg = config.load(a.config)
-    t = cfg["tiktok"]
-    d = Path(a.dir)
-    mpath = d / "manifest.json"
-    manifest = json.loads(mpath.read_text())
-    ids = {int(x) for x in a.ids.split(",")} if a.ids else None
-    for i, m in enumerate(manifest, 1):
-        if m["uploaded"] or (ids and i not in ids):
-            continue
-        title = t["title_template"].format(title=m["title"], hashtags=" ".join(t["hashtags"])).strip()
-        if a.dry_run:
-            log(f"[dry-run] {m['file']}: {title}")
-            continue
-        pid = tiktok.upload(d / m["file"], t, title)
-        m["uploaded"], m["publish_id"] = True, pid
-        mpath.write_text(json.dumps(manifest, indent=2, ensure_ascii=False))
-        log(f"{m['file']} hochgeladen (publish_id {pid}, Modus {t['mode']})")
+    live.run_live(cfg, a.channel or cfg["twitch"]["channel"], Path(a.workdir), Path(a.out) / "live",
+                  source=a.source, dry_run=a.dry_run, threshold=a.threshold)
 
 
-def cmd_auth(a: argparse.Namespace) -> None:
-    if not a.code:
-        print("Oeffne im Browser und erlaube den Zugriff:\n" + tiktok.auth_url(a.redirect_uri))
-        print("\nDann den 'code'-Parameter aus der Redirect-URL kopieren und ausfuehren:\n"
-              f"  clipbot tiktok-auth --redirect-uri {a.redirect_uri} --code <CODE>")
-        return
-    tiktok.exchange_code(a.code, a.redirect_uri)
-    log("Login gespeichert (tokens.json).")
-
-
-def cmd_status(a: argparse.Namespace) -> None:
-    print(json.dumps(tiktok.status(a.publish_id), indent=2))
+def cmd_clips(a: argparse.Namespace) -> None:
+    from . import clipsmode
+    cfg = config.load(a.config)
+    ch = a.channel or cfg["twitch"]["channel"]
+    clipsmode.run_clips(cfg, ch, a.days, a.count, Path(a.workdir), Path(a.out) / f"clips_{ch}")
 
 
 def main() -> None:
@@ -159,20 +139,22 @@ def main() -> None:
     r.add_argument("--out", default="out")
     r.set_defaults(fn=cmd_run)
 
-    u = sub.add_parser("upload", help="Clips eines Ordners zu TikTok hochladen")
-    u.add_argument("dir")
-    u.add_argument("--ids", help="nur diese Clip-Nummern, z.B. 1,3")
-    u.add_argument("--dry-run", action="store_true")
-    u.set_defaults(fn=cmd_upload)
+    lv = sub.add_parser("live", help="Stream live mitschneiden und Highlights sofort schneiden")
+    lv.add_argument("channel", nargs="?")
+    lv.add_argument("--threshold", type=float)
+    lv.add_argument("--dry-run", action="store_true", help="nur melden, nichts schneiden (zum Einstellen)")
+    lv.add_argument("--source", help="Test: lokale Datei/URL statt Twitch-Stream")
+    lv.add_argument("--workdir", default="work")
+    lv.add_argument("--out", default="out")
+    lv.set_defaults(fn=cmd_live)
 
-    t = sub.add_parser("tiktok-auth", help="TikTok-Login einrichten")
-    t.add_argument("--redirect-uri", required=True)
-    t.add_argument("--code")
-    t.set_defaults(fn=cmd_auth)
-
-    s = sub.add_parser("tiktok-status", help="Status eines Uploads abfragen")
-    s.add_argument("publish_id")
-    s.set_defaults(fn=cmd_status)
+    cl = sub.add_parser("clips", help="Zuschauer-Clips eines Kanals laden und hochkant rendern")
+    cl.add_argument("channel", nargs="?")
+    cl.add_argument("--days", type=int, default=7)
+    cl.add_argument("--count", type=int, default=10)
+    cl.add_argument("--workdir", default="work")
+    cl.add_argument("--out", default="out")
+    cl.set_defaults(fn=cmd_clips)
 
     a = p.parse_args()
     if a.cmd == "run":

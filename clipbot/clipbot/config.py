@@ -19,15 +19,15 @@ DEFAULTS: dict = {
         "min_words_per_sec": 0.25,
         "hype_words": ["alter", "digga", "bruder", "nein", "krass", "wtf", "lol", "haha"],
     },
+    "live": {
+        "threshold": 0.9, "audio_only_threshold": 0.6, "history_s": 600, "min_history_s": 120,
+        "buffer_min": 20, "segment_s": 10, "poll_s": 3, "webhook": "",
+    },
     "transcribe": {"model": "small", "device": "cpu", "compute_type": "int8", "language": "de"},
     "render": {
         "layout": "blur",
         "facecam": {"x": 0.0, "y": 0.7, "w": 0.25, "h": 0.3},
         "subtitles": True, "font": "Arial", "font_size": 76,
-    },
-    "tiktok": {
-        "mode": "inbox", "privacy_level": "SELF_ONLY",
-        "hashtags": ["#gtasty", "#gta", "#fyp"], "title_template": "{title} {hashtags}",
     },
 }
 

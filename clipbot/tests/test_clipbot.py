@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from clipbot import audio, config, detect, render, tiktok  # noqa: E402
+from clipbot import audio, config, detect, live, render  # noqa: E402
 
 
 class DetectTests(unittest.TestCase):
@@ -45,14 +45,61 @@ class DetectTests(unittest.TestCase):
         self.assertGreater(detect.text_rescore(c, ["alter"], 0.25), 1.0)
 
 
+class LiveTests(unittest.TestCase):
+    def _hist(self, spike_at, n=400, chat=True):
+        rng = np.random.default_rng(1)
+        a = rng.normal(-35, 1.5, n).astype(np.float32)
+        c = rng.poisson(3, n).astype(np.float32)
+        a[spike_at:spike_at + 4] += 20
+        if chat:
+            c[spike_at - 1:spike_at + 6] += 40
+        return a, c
+
+    def test_trigger_after_postroll(self):
+        a, c = self._hist(350)
+        pk, v = detect.live_peak(a, c, 1000, 1, 1.5, 0.9, 0.6, 10, 90, -1e9)
+        self.assertIsNotNone(pk)
+        self.assertLess(abs(pk - 1353), 6)
+
+    def test_no_trigger_while_fresh(self):
+        a, c = self._hist(395, n=400)
+        pk, _ = detect.live_peak(a, c, 1000, 1, 1.5, 0.9, 0.6, 10, 90, -1e9)
+        self.assertIsNone(pk)
+
+    def test_no_trigger_in_quiet_or_cooldown(self):
+        rng = np.random.default_rng(2)
+        a = rng.normal(-35, 1.5, 400).astype(np.float32)
+        c = rng.poisson(3, 400).astype(np.float32)
+        self.assertIsNone(detect.live_peak(a, c, 1000, 1, 1.5, 0.9, 0.6, 10, 90, -1e9)[0])
+        a, c = self._hist(350)
+        self.assertIsNone(detect.live_peak(a, c, 1000, 1, 1.5, 0.9, 0.6, 10, 90, 1340)[0])
+
+    def test_audio_only_fallback(self):
+        a, c = self._hist(350, chat=False)
+        pk, _ = detect.live_peak(a, np.zeros(400, dtype=np.float32), 1000, 1, 1.5, 0.9, 0.6, 10, 90, -1e9)
+        self.assertIsNotNone(pk)
+
+    def test_irc_classify(self):
+        self.assertEqual(live.classify("PING :tmi.twitch.tv"), "ping::tmi.twitch.tv")
+        self.assertEqual(live.classify(":a!a@a.tmi.twitch.tv PRIVMSG #x :KEKW"), "msg")
+        self.assertEqual(live.classify(":tmi.twitch.tv 001 x :Welcome"), "other")
+
+    def test_segments_concat(self):
+        with tempfile.TemporaryDirectory() as td:
+            td = Path(td)
+            for i in range(3):
+                subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", "testsrc=s=320x240:r=15:d=4",
+                                "-f", "lavfi", "-i", "sine=d=4", "-shortest", "-pix_fmt", "yuv420p",
+                                "-f", "mpegts", str(td / f"seg_20260101_0000{i * 4:02d}.ts")], check=True)
+            segs = sorted((live.seg_start(p), p) for p in td.glob("seg_*.ts"))
+            first = live.concat_segments(segs, segs[0][0] + 1, segs[2][0] + 1, 4, td / "cut.ts")
+            self.assertEqual(first, segs[0][0])
+            self.assertAlmostEqual(audio.duration(str(td / "cut.ts")), 12.0, delta=0.6)
+
+
 class ConfigTests(unittest.TestCase):
     def test_defaults(self):
         self.assertEqual(config.load("/nonexistent.toml")["twitch"]["channel"], "gtasty")
-
-    def test_chunks(self):
-        self.assertEqual(tiktok._chunks(3_000_000), (3_000_000, 1))
-        c, n = tiktok._chunks(25 * 1024 * 1024)
-        self.assertEqual((c, n), (tiktok.CHUNK, 2))
 
 
 class RenderTests(unittest.TestCase):

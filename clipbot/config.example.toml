@@ -22,6 +22,14 @@ overgenerate = 2.0     # so viele Kandidaten mehr transkribieren, dann neu ranke
 min_words_per_sec = 0.25
 hype_words = ["alter", "digga", "bruder", "nein", "was", "ey", "krass", "wtf", "lol", "haha", "ernsthaft", "brudi", "junge", "oh nein", "komm"]
 
+[live]
+threshold = 0.9        # Ausloeser mit Chat (hoeher = weniger, aber bessere Clips)
+audio_only_threshold = 0.6   # Ausloeser, falls kein Chat verfuegbar ist
+history_s = 600        # Grundlinie: so viele Sekunden Vergangenheit zaehlen als "normal"
+min_history_s = 120    # erst nach so vielen Sekunden Aufnahme auswerten
+buffer_min = 20        # Minuten Rohmaterial, die vorgehalten werden
+webhook = ""           # optional: Discord-Webhook-URL fuer Meldungen ueber neue Clips
+
 [transcribe]
 model = "small"        # tiny/base/small/medium/large-v3 (kleiner = schneller auf CPU)
 device = "cpu"         # "cuda" falls GPU vorhanden
@@ -35,9 +43,3 @@ facecam = { x = 0.0, y = 0.7, w = 0.25, h = 0.3 }
 subtitles = true
 font = "Arial"
 font_size = 76
-
-[tiktok]
-mode = "inbox"         # "inbox" = landet als Entwurf in der TikTok-App (empfohlen), "direct" = direkt posten
-privacy_level = "SELF_ONLY"  # bei direct; ohne TikTok-Audit sind nur private Posts erlaubt
-hashtags = ["#gtasty", "#gta", "#fyp", "#lustig"]
-title_template = "{title} {hashtags}"
