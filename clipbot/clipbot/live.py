@@ -1,10 +1,8 @@
 """Live-Modus: Stream mitschneiden (Segmente), Chat + Lautstaerke beobachten, Highlights sofort schneiden."""
 from __future__ import annotations
 
-import calendar
 import collections
 import json
-import os
 import queue
 import re
 import socket
@@ -28,7 +26,8 @@ def log(msg: str) -> None:
 
 def seg_start(path: Path) -> int | None:
     m = SEG_RE.search(path.name)
-    return calendar.timegm(time.strptime(m.group(1) + m.group(2), "%Y%m%d%H%M%S")) if m else None
+    # ffmpeg schreibt die Dateinamen (strftime) in Ortszeit -> auch als Ortszeit lesen (Windows kennt kein TZ=UTC)
+    return int(time.mktime(time.strptime(m.group(1) + m.group(2), "%Y%m%d%H%M%S"))) if m else None
 
 
 def classify(line: str) -> str:
@@ -89,7 +88,7 @@ class ChatCounter(threading.Thread):
 
 
 class Recorder(threading.Thread):
-    """Haelt ffmpeg am Laufen, das den Live-Stream in 10-s-Segmente (UTC-Dateinamen) schreibt."""
+    """Haelt ffmpeg am Laufen, das den Live-Stream in 10-s-Segmente (Dateinamen in Ortszeit) schreibt."""
 
     def __init__(self, channel: str, fmt: str, seg_dir: Path, seg_s: int, source: str | None) -> None:
         super().__init__(daemon=True)
@@ -119,7 +118,7 @@ class Recorder(threading.Thread):
                 cmd += ["-re"]  # lokale Datei in Echtzeit abspielen (Test)
             cmd += ["-i", url, "-c", "copy", "-f", "segment", "-segment_time", str(self.seg_s),
                     "-segment_format", "mpegts", "-strftime", "1", str(self.dir / "seg_%Y%m%d_%H%M%S.ts")]
-            self.proc = subprocess.Popen(cmd, env={**os.environ, "TZ": "UTC"})
+            self.proc = subprocess.Popen(cmd)
             self.proc.wait()
             self.live = False
             log("Aufnahme beendet (Stream offline?). Warte auf naechsten Stream.")
@@ -137,7 +136,7 @@ def concat_segments(segs: list[tuple[int, Path]], t0: float, t1: float, seg_s: i
     if not use:
         return None
     lst = dest.with_suffix(".txt")
-    lst.write_text("".join(f"file '{p.resolve()}'\n" for _, p in use))
+    lst.write_text("".join(f"file '{p.resolve().as_posix()}'\n" for _, p in use))
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(lst),
                     "-c", "copy", str(dest)], check=True)
     return use[0][0]

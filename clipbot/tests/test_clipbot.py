@@ -84,6 +84,22 @@ class LiveTests(unittest.TestCase):
         self.assertEqual(live.classify(":a!a@a.tmi.twitch.tv PRIVMSG #x :KEKW"), "msg")
         self.assertEqual(live.classify(":tmi.twitch.tv 001 x :Welcome"), "other")
 
+    @unittest.skipUnless(hasattr(__import__('time'), 'tzset'), 'tzset nur unter Unix')
+    def test_seg_start_is_local_time(self):
+        import os, time
+        old = os.environ.get("TZ")
+        os.environ["TZ"] = "Europe/Berlin"
+        time.tzset()
+        try:
+            t = live.seg_start(Path("seg_20260115_120000.ts"))
+            self.assertEqual(time.strftime("%H:%M:%S", time.localtime(t)), "12:00:00")
+        finally:
+            if old is None:
+                os.environ.pop("TZ", None)
+            else:
+                os.environ["TZ"] = old
+            time.tzset()
+
     def test_segments_concat(self):
         with tempfile.TemporaryDirectory() as td:
             td = Path(td)
