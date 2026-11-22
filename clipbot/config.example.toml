@@ -29,6 +29,7 @@ history_s = 600        # Grundlinie: so viele Sekunden Vergangenheit zaehlen als
 min_history_s = 120    # erst nach so vielen Sekunden Aufnahme auswerten
 buffer_min = 20        # Minuten Rohmaterial, die vorgehalten werden
 webhook = ""           # optional: Discord-Webhook-URL fuer Meldungen ueber neue Clips
+mood_weight = 2.0      # wie stark Lachen/Schock im Chat zaehlen (0 = nur Nachrichtentempo)
 
 [transcribe]
 model = "small"        # tiny/base/small/medium/large-v3 (kleiner = schneller auf CPU)

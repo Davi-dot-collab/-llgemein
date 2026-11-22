@@ -114,7 +114,7 @@ def cmd_live(a: argparse.Namespace) -> None:
     from . import live
     cfg = config.load(a.config)
     live.run_live(cfg, a.channel or cfg["twitch"]["channel"], Path(a.workdir), Path(a.out) / "live",
-                  source=a.source, dry_run=a.dry_run, threshold=a.threshold)
+                  source=a.source, dry_run=a.dry_run, threshold=a.threshold, chat_only=a.chat_only)
 
 
 def cmd_clips(a: argparse.Namespace) -> None:
@@ -122,6 +122,14 @@ def cmd_clips(a: argparse.Namespace) -> None:
     cfg = config.load(a.config)
     ch = a.channel or cfg["twitch"]["channel"]
     clipsmode.run_clips(cfg, ch, a.days, a.count, Path(a.workdir), Path(a.out) / f"clips_{ch}")
+
+
+def cmd_ui(a: argparse.Namespace) -> None:
+    from . import ui
+    cfg_path = Path(a.config or "config.toml")
+    if not cfg_path.exists():
+        config.save(config.load(None), cfg_path)
+    ui.serve(a.port, cfg_path, Path(a.workdir), Path(a.out), open_browser=not a.no_browser)
 
 
 def main() -> None:
@@ -139,10 +147,18 @@ def main() -> None:
     r.add_argument("--out", default="out")
     r.set_defaults(fn=cmd_run)
 
+    ui_p = sub.add_parser("ui", help="Weboberflaeche starten (Einstellungen, Start/Stopp, Live-Anzeige)")
+    ui_p.add_argument("--port", type=int, default=8765)
+    ui_p.add_argument("--no-browser", action="store_true")
+    ui_p.add_argument("--workdir", default="work")
+    ui_p.add_argument("--out", default="out")
+    ui_p.set_defaults(fn=cmd_ui)
+
     lv = sub.add_parser("live", help="Stream live mitschneiden und Highlights sofort schneiden")
     lv.add_argument("channel", nargs="?")
     lv.add_argument("--threshold", type=float)
     lv.add_argument("--dry-run", action="store_true", help="nur melden, nichts schneiden (zum Einstellen)")
+    lv.add_argument("--chat-only", action="store_true", help="nur Chat beobachten und melden (keine Aufnahme)")
     lv.add_argument("--source", help="Test: lokale Datei/URL statt Twitch-Stream")
     lv.add_argument("--workdir", default="work")
     lv.add_argument("--out", default="out")

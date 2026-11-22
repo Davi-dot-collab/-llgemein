@@ -2,6 +2,22 @@
 
 Sucht lustige/virale Momente in Streams und schneidet sie als 9:16-Clips mit Untertiteln. Der Upload (z. B. TikTok) passiert von Hand, das Programm braucht **keine Accounts und keine API-Keys**.
 
+## Oberfläche (empfohlen)
+
+```bash
+python -m clipbot ui
+```
+
+Öffnet im Browser `http://127.0.0.1:8765` (läuft nur auf deinem Rechner). Dort stellst du den Streamer, die Empfindlichkeit, Clip-Länge, Layout und Whisper ein, startest und stoppst den Bot und siehst live, was er im Chat erkennt:
+
+- Diagramm mit Nachrichten pro Sekunde und Lachen (HAHA, KEKW, LUL), Schock (WTF, OMG, `???`), Clip-Rufen („clip it“) und Spam (gleiche Nachricht kurz hintereinander), jeweils im Vergleich zum Normalwert der letzten 10 Minuten
+- Score-Linie mit Schwelle, die Liste der erkannten Highlights samt Begründung („Chat 5x schneller als normal, Lachen x77“)
+- Chat-Ticker mit Stimmungs-Markierung, Clip-Galerie mit Download, Protokoll
+- **Nur Chat beobachten** liest nur den Chat und meldet Highlights, ohne Aufnahme. Gut zum Einstellen der Schwelle, braucht kaum Leistung.
+- **Testlauf (nur melden)** nimmt auf und erkennt, schneidet aber nichts.
+
+Die Einstellungen werden in `config.toml` gespeichert (Kommentare aus der Beispieldatei gehen dabei verloren).
+
 ## Modi
 
 | Befehl | Wofür |
@@ -42,7 +58,7 @@ Titel und Scores stehen in `manifest.json` neben den Clips.
 
 1. yt-dlp liefert die Stream-URL, ffmpeg schreibt 10-s-Segmente (Puffer ca. 20 min, Älteres wird gelöscht).
 2. Chat-Nachrichten pro Sekunde kommen über anonymen Twitch-IRC. Die Lautstärke wird pro Segment gemessen.
-3. Die Werte werden gegen die letzten 10 Minuten als „normal“ verglichen. Ein Peak löst aus, sobald er 10 s alt ist und nichts Höheres folgte.
+3. Der Chat zählt nicht nur das Tempo, sondern auch Lachen, Schock, Clip-Rufe und Spam (`[live] mood_weight`). Alles wird gegen die letzten 10 Minuten als „normal“ verglichen. Ein Peak löst aus, sobald er 10 s alt ist und nichts Höheres folgte.
 4. Aus dem Puffer werden ca. 22 s davor und 10 s danach geschnitten, transkribiert, an Satzgrenzen ausgerichtet und gerendert. Clips ohne Sprache werden verworfen.
 5. Optional meldet ein Discord-Webhook (`[live] webhook`) jeden neuen Clip.
 

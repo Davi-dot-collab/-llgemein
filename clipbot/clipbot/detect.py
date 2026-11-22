@@ -109,6 +109,14 @@ def speech_rate(c: Candidate) -> float:
     return sum(1 for w in c.words if c.start - c.section_start <= w[0] <= c.end - c.section_start) / dur
 
 
+def live_series(audio_db: np.ndarray, chat: np.ndarray | None, w_audio: float,
+                w_chat: float) -> tuple[np.ndarray, bool]:
+    """Geglaetteter Live-Score pro Sekunde und ob ein Chat-Signal vorhanden ist."""
+    have_chat = chat is not None and float(np.sum(chat)) > 0
+    score, _ = combine(audio_db, chat if have_chat else None, [], w_audio, w_chat if have_chat else 0.0, 0.0)
+    return smooth(score, 7), have_chat
+
+
 def live_peak(audio_db: np.ndarray, chat: np.ndarray, t0: int, w_audio: float, w_chat: float,
               thr: float, thr_audio_only: float, post_roll: float, min_gap: float,
               last_peak: float, lookback: int = 90) -> tuple[float | None, float]:
@@ -116,9 +124,7 @@ def live_peak(audio_db: np.ndarray, chat: np.ndarray, t0: int, w_audio: float, w
     Ein Peak loest erst aus, wenn er `post_roll` Sekunden alt ist und danach nichts Hoeheres kam.
     Gibt (absolute Peak-Zeit oder None, Peak-Score) zurueck."""
     n = len(audio_db)
-    have_chat = chat is not None and float(np.sum(chat)) > 0
-    score, _ = combine(audio_db, chat if have_chat else None, [], w_audio, w_chat if have_chat else 0.0, 0.0)
-    sm = smooth(score, 7)
+    sm, have_chat = live_series(audio_db, chat, w_audio, w_chat)
     lo = max(0, n - lookback)
     i = lo + int(np.argmax(sm[lo:]))
     value = float(sm[i])
