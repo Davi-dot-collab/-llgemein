@@ -134,6 +134,11 @@ class UiServerTests(unittest.TestCase):
         self.assertEqual(self.req("GET", "/media/../secret.mp4")[0], 404)
         self.assertEqual(self.req("GET", "/media/%2e%2e/secret.mp4")[0], 404)
 
+    def test_check_endpoint(self):
+        st, body, _ = self.req("GET", "/api/check")
+        ids = {i["id"] for i in json.loads(body)}
+        self.assertEqual(ids, {"ffmpeg", "yt-dlp", "whisper", "gpu"})
+
     def test_unknown_mode(self):
         st, body, _ = self.req("POST", "/api/start", {"mode": "quatsch"}, {"X-Clipbot": "1"})
         self.assertFalse(json.loads(body)["ok"])

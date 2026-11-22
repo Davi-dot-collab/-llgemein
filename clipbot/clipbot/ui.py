@@ -5,9 +5,11 @@ die Oberflaeche liest nur seine Status-Datei.
 """
 from __future__ import annotations
 
+import importlib.util
 import json
 import mimetypes
 import os
+import shutil
 import subprocess
 import sys
 import threading
@@ -18,6 +20,36 @@ from pathlib import Path
 from urllib.parse import unquote, urlparse
 
 from . import config
+
+
+def tool_path() -> str:
+    """PATH inkl. Ordner des laufenden Python (dort liegt yt-dlp im venv)."""
+    return str(Path(sys.executable).parent) + os.pathsep + os.environ.get("PATH", "")
+
+
+def system_check() -> list[dict]:
+    path = tool_path()
+    gpu = shutil.which("nvidia-smi", path=path)
+    return [
+        {"id": "ffmpeg", "ok": bool(shutil.which("ffmpeg", path=path)), "text": "ffmpeg (zum Schneiden der Videos)",
+         "fix": "In der PowerShell ausfuehren: winget install Gyan.FFmpeg  - danach start.bat neu starten."},
+        {"id": "yt-dlp", "ok": bool(shutil.which("yt-dlp", path=path)), "text": "yt-dlp (zum Laden des Streams)",
+         "fix": "Starte das Programm ueber start.bat, das installiert alles automatisch."},
+        {"id": "whisper", "ok": importlib.util.find_spec("faster_whisper") is not None,
+         "text": "faster-whisper (Untertitel)", "fix": "Starte das Programm ueber start.bat."},
+        {"id": "gpu", "ok": True, "info": True,
+         "text": "Nvidia-Grafikkarte gefunden (schnellere Untertitel moeglich)" if gpu else "Keine Nvidia-Grafikkarte (laeuft auf dem Prozessor, etwas langsamer)"},
+    ]
+
+
+def open_folder(path: Path) -> None:
+    path.mkdir(parents=True, exist_ok=True)
+    if sys.platform.startswith("win"):
+        os.startfile(str(path))  # type: ignore[attr-defined]
+    elif sys.platform == "darwin":
+        subprocess.Popen(["open", str(path)])
+    else:
+        subprocess.Popen(["xdg-open", str(path)])
 
 
 class Manager:
@@ -53,7 +85,9 @@ class Manager:
             (self.workdir / "live_status.json").unlink(missing_ok=True)
             log = open(self.log_path, "a", encoding="utf-8", buffering=1)
             log.write(f"\n=== {time.strftime('%Y-%m-%d %H:%M:%S')} Start: {mode} ===\n")
-            env = {**os.environ, "PYTHONUTF8": "1", "PYTHONUNBUFFERED": "1"}
+            pkg_root = str(Path(__file__).resolve().parent.parent)   # damit "python -m clipbot" immer klappt
+            env = {**os.environ, "PYTHONUTF8": "1", "PYTHONUNBUFFERED": "1", "PATH": tool_path(),
+                   "PYTHONPATH": pkg_root + os.pathsep + os.environ.get("PYTHONPATH", "")}
             self.proc = subprocess.Popen(cmd, stdout=log, stderr=subprocess.STDOUT, env=env,
                                          cwd=str(self.config_path.resolve().parent))
             self.mode = mode
@@ -128,6 +162,8 @@ def make_handler(mgr: Manager, html: bytes, port: int):
                 return self._send(200, html, "text/html; charset=utf-8")
             if path == "/api/state":
                 return self._json(self._state())
+            if path == "/api/check":
+                return self._json(system_check())
             if path == "/api/clips":
                 return self._json(list_clips(mgr.out))
             if path.startswith("/media/"):
@@ -153,6 +189,12 @@ def make_handler(mgr: Manager, html: bytes, port: int):
             if path == "/api/start":
                 err = mgr.start(str(body.get("mode", "")), body)
                 return self._json({"ok": not err, "error": err})
+            if path == "/api/open_out":
+                try:
+                    open_folder(mgr.out)
+                except OSError as e:
+                    return self._json({"ok": False, "error": str(e)})
+                return self._json({"ok": True})
             if path == "/api/stop":
                 threading.Thread(target=mgr.stop, daemon=True).start()
                 return self._json({"ok": True})
@@ -168,7 +210,8 @@ def make_handler(mgr: Manager, html: bytes, port: int):
             except (OSError, ValueError):
                 pass
             return {"config": config.load(mgr.config_path), "running": mgr.running(), "mode": mgr.mode,
-                    "status": status, "log": mgr.log_tail(), "now": time.time()}
+                    "status": status, "log": mgr.log_tail(), "now": time.time(),
+                    "exit_code": None if mgr.proc is None else mgr.proc.poll()}
 
         def _media(self, rel: str) -> None:
             f = (mgr.out / rel).resolve()

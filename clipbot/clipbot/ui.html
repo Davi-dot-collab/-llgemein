@@ -6,186 +6,221 @@
 <title>Clipbot</title>
 <style>
 :root{
-  --bg:#f5f6f8;--card:#fff;--ink:#1c2230;--muted:#667085;--line:#e3e6ec;--accent:#6d4aff;--accent-ink:#fff;
-  --ok:#16a34a;--warn:#d97706;--bad:#dc2626;
+  --bg:#f4f5f8;--card:#fff;--ink:#1c2230;--muted:#5f6b7f;--line:#e3e6ec;--accent:#6d4aff;--accent-ink:#fff;
+  --ok:#16a34a;--warn:#d97706;--bad:#dc2626;--soft:#f0edff;
   --c-msg:#9aa6bd;--c-laugh:#e8a800;--c-shock:#8b5cf6;--c-clip:#16a34a;--c-spam:#ef4444;--c-score:#6d4aff;
 }
 @media (prefers-color-scheme:dark){:root{
-  --bg:#12151c;--card:#1b2029;--ink:#e8ebf2;--muted:#98a2b3;--line:#2b3240;--accent:#8b72ff;--accent-ink:#0f1117;
+  --bg:#12151c;--card:#1b2029;--ink:#e8ebf2;--muted:#9aa5b8;--line:#2b3240;--accent:#8b72ff;--accent-ink:#0f1117;--soft:#262244;
   --c-msg:#5d6a86;--c-laugh:#f5c242;--c-shock:#a78bfa;--c-clip:#4ade80;--c-spam:#f87171;--c-score:#8b72ff;}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:14px 20px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
-h1{margin:0;font-size:20px}
-h2{margin:0 0 10px;font-size:15px}
-h3{margin:16px 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
-.badge{padding:3px 10px;border-radius:99px;font-size:13px;background:var(--line);color:var(--ink)}
-.badge.on{background:var(--ok);color:#fff}.badge.wait{background:var(--warn);color:#fff}
-.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--muted);margin:0 4px 0 10px}
-.dot.on{background:var(--ok)}
-.spacer{flex:1}
-.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-button{font:inherit;padding:7px 14px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
-button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-button.stop{background:var(--bad);color:#fff;border-color:var(--bad)}
-button:disabled{opacity:.45;cursor:not-allowed}
-main{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(340px,1fr);gap:16px;padding:16px 20px;align-items:start}
-@media (max-width:900px){main{grid-template-columns:1fr}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
-.wide{grid-column:1/-1}
-canvas{width:100%;height:150px;display:block}
-.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);margin:6px 0 2px}
-.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}
-.msgs{max-height:230px;overflow:auto;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:6px 10px}
-.msgs div{padding:2px 0;border-bottom:1px dashed var(--line);display:flex;gap:6px;align-items:baseline}
-.chip{font-size:11px;padding:0 6px;border-radius:99px;color:#fff;white-space:nowrap}
-.chip.laugh{background:var(--c-laugh);color:#222}.chip.shock{background:var(--c-shock)}.chip.clip{background:var(--c-clip)}.chip.spam{background:var(--c-spam)}
-table{width:100%;border-collapse:collapse;font-size:14px}
-td,th{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line)}
-th{color:var(--muted);font-weight:500;font-size:12px}
-.field{display:grid;grid-template-columns:1fr minmax(150px,210px);gap:4px 10px;align-items:center;margin:8px 0}
-.field label{font-size:14px}
-.field small{grid-column:1/-1;color:var(--muted);font-size:12px;margin-top:-2px}
-.field.full{grid-template-columns:1fr}
-input[type=text],input[type=number],select,textarea{width:100%;font:inherit;padding:6px 8px;border-radius:7px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
-input[type=range]{width:100%}
-.val{font-variant-numeric:tabular-nums;color:var(--muted);font-size:12px;text-align:right}
-.clips{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
-.clip video{width:100%;aspect-ratio:9/16;background:#000;border-radius:8px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+h1{margin:0;font-size:24px}
+h2{margin:0 0 4px;font-size:18px}
+.sub{color:var(--muted);font-size:14px;margin:0 0 12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+.step{display:flex;gap:12px;align-items:flex-start}
+.num{flex:none;width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:700}
+.step>div:last-child{flex:1;min-width:0}
+input[type=text],input[type=number],select,textarea{width:100%;font:inherit;padding:10px 12px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.seg button,.mode{font:inherit;padding:10px 8px;border-radius:10px;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;text-align:center}
+.seg button b{display:block}
+.seg button small,.mode small{display:block;color:var(--muted);font-size:13px;line-height:1.3;margin-top:2px}
+.seg button.on,.mode.on{border-color:var(--accent);background:var(--soft)}
+.modes{display:grid;gap:8px}
+.mode{text-align:left;padding:12px 14px}
+.mode b{display:block}
+.big{width:100%;font:inherit;font-size:19px;font-weight:700;padding:15px;border-radius:12px;border:0;cursor:pointer;background:var(--accent);color:var(--accent-ink);margin-top:6px}
+.big.stop{background:var(--bad);color:#fff}
+.big:disabled{opacity:.5;cursor:not-allowed}
+button.small{font:inherit;font-size:14px;padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.status{display:flex;gap:12px;align-items:center}
+.lamp{flex:none;width:14px;height:14px;border-radius:50%;background:var(--muted)}
+.lamp.on{background:var(--ok);box-shadow:0 0 0 4px color-mix(in srgb,var(--ok) 25%,transparent)}
+.lamp.wait{background:var(--warn)}
+.lamp.bad{background:var(--bad)}
+.status p{margin:0}
+.status .main{font-weight:600}
+.meter{height:14px;border-radius:99px;background:var(--line);overflow:hidden;margin:12px 0 4px}
+.meter>div{height:100%;width:0;background:var(--accent);transition:width .6s,background .6s}
+.meter-l{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+.alert{border-radius:12px;padding:12px 14px;margin-bottom:16px;background:color-mix(in srgb,var(--bad) 12%,var(--card));border:1px solid var(--bad)}
+.alert.soft{background:color-mix(in srgb,var(--warn) 12%,var(--card));border-color:var(--warn)}
+.alert code,.alert pre{font-size:13px;background:var(--bg);padding:2px 6px;border-radius:6px}
+.alert pre{padding:8px;white-space:pre-wrap;max-height:160px;overflow:auto}
+.hl{border-top:1px solid var(--line);padding:8px 0;font-size:14px}
+.hl:first-child{border-top:0}
+.hl b{font-variant-numeric:tabular-nums}
+.clips{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.clip video{width:100%;aspect-ratio:9/16;background:#000;border-radius:10px}
 .clip .t{font-weight:600;font-size:14px;margin:6px 0 2px;word-break:break-word}
 .clip .m{font-size:12px;color:var(--muted)}
-.empty{color:var(--muted);font-size:14px}
-details pre{max-height:220px;overflow:auto;background:var(--bg);padding:8px;border-radius:8px;font-size:12px;white-space:pre-wrap}
-.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:99px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
+.empty{color:var(--muted);font-size:14px;margin:0}
+.row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:10px}
+details{margin-bottom:16px}
+details>summary{cursor:pointer;font-weight:600;padding:12px 16px;background:var(--card);border:1px solid var(--line);border-radius:12px;list-style:none}
+details[open]>summary{border-bottom-left-radius:0;border-bottom-right-radius:0}
+details>summary::before{content:"▸ ";color:var(--muted)}
+details[open]>summary::before{content:"▾ "}
+details>.in{background:var(--card);border:1px solid var(--line);border-top:0;border-radius:0 0 12px 12px;padding:16px}
+canvas{width:100%;height:140px;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--muted);margin:6px 0}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}
+.msgs{max-height:200px;overflow:auto;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+.msgs div{padding:2px 0;border-bottom:1px dashed var(--line)}
+.chip{font-size:11px;padding:0 6px;border-radius:99px;color:#fff;margin-left:6px}
+.chip.laugh{background:var(--c-laugh);color:#222}.chip.shock{background:var(--c-shock)}.chip.clip{background:var(--c-clip)}.chip.spam{background:var(--c-spam)}
+h3{margin:14px 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.field{display:grid;grid-template-columns:1fr minmax(120px,200px);gap:4px 10px;align-items:center;margin:8px 0}
+.field.full{grid-template-columns:1fr}
+.field small{grid-column:1/-1;color:var(--muted);font-size:12px;margin-top:-2px}
+input[type=range]{width:100%}
+.val{color:var(--muted);font-size:12px;grid-column:1/-1;text-align:right}
+pre.log{max-height:220px;overflow:auto;background:var(--bg);padding:8px;border-radius:8px;font-size:12px;white-space:pre-wrap;margin:0}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 18px;border-radius:99px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.show{opacity:1}
 </style>
 </head>
 <body>
-<header>
-  <h1>Clipbot</h1>
-  <span class="badge" id="badge">Aus</span>
-  <span><span class="dot" id="dotStream"></span>Stream live<span class="dot" id="dotChat"></span>Chat verbunden</span>
-  <span class="spacer"></span>
-  <div class="actions">
-    <label style="font-size:13px"><input type="checkbox" id="dry"> Testlauf (nur melden)</label>
-    <button class="primary" id="bLive">▶ Live starten</button>
-    <button id="bChat" title="Nur den Chat lesen und Highlights melden, ohne Aufnahme">Nur Chat beobachten</button>
-    <button id="bClips" title="Fertige Zuschauer-Clips des Streamers laden und hochkant rendern">Clips-Modus</button>
-    <button class="stop" id="bStop">■ Stopp</button>
+<div class="wrap">
+<header><h1>Clipbot</h1><span class="sub" style="margin:0">Findet die lustigsten Momente im Stream und schneidet sie als Clips.</span></header>
+
+<div id="checks"></div>
+
+<section class="card" id="setup">
+  <div class="step"><div class="num">1</div><div>
+    <h2>Von welchem Streamer?</h2>
+    <p class="sub">Der Twitch-Name, so wie er in der Adresse steht (twitch.tv/<b>gtasty</b>).</p>
+    <input type="text" id="channel" placeholder="gtasty" autocomplete="off" spellcheck="false">
+  </div></div>
+  <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
+  <div class="step"><div class="num">2</div><div>
+    <h2>Wie viele Clips willst du?</h2>
+    <p class="sub">Du kannst das jederzeit ändern.</p>
+    <div class="seg" id="sens">
+      <button data-v="1.3"><b>Wenige</b><small>nur die besten Momente</small></button>
+      <button data-v="0.9"><b>Mittel</b><small>empfohlen</small></button>
+      <button data-v="0.6"><b>Viele</b><small>auch kleinere Lacher</small></button>
+    </div>
+  </div></div>
+  <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
+  <div class="step"><div class="num">3</div><div>
+    <h2>Was soll passieren?</h2>
+    <div class="modes" id="modes">
+      <div class="mode on" data-m="live"><b>Clips automatisch schneiden</b><small>Der Bot schaut dem Stream zu und schneidet selbst, sobald im Chat etwas los ist.</small></div>
+      <div class="mode" data-m="chat"><b>Nur zuschauen (Test)</b><small>Der Bot liest nur den Chat und meldet Highlights. Es wird nichts aufgenommen, gut zum Ausprobieren.</small></div>
+      <div class="mode" data-m="clips"><b>Fertige Zuschauer-Clips holen</b><small>Lädt die beliebtesten Clips der letzten Tage und macht daraus Hochkant-Videos mit Untertiteln.</small></div>
+    </div>
+    <button class="big" id="go">▶ Starten</button>
+  </div></div>
+</section>
+
+<section class="card" id="statusCard">
+  <div class="status"><div class="lamp" id="lamp"></div><div>
+    <p class="main" id="stMain">Der Bot ist aus.</p><p class="sub" id="stSub" style="margin:0"></p></div></div>
+  <div id="meterBox" style="display:none">
+    <div class="meter"><div id="meter"></div></div>
+    <div class="meter-l"><span>ruhig</span><span id="meterWord"></span><span>Highlight</span></div>
   </div>
-</header>
+  <div id="errBox"></div>
+</section>
 
-<main>
-  <section class="card" id="monitor">
-    <h2>Was der Bot gerade sieht <span class="val" id="stateInfo"></span></h2>
-    <canvas id="cChat"></canvas>
-    <div class="legend" id="legend"></div>
-    <h3>Highlight-Score (Linie) und Schwelle (gestrichelt)</h3>
-    <canvas id="cScore"></canvas>
-    <h3>Chat live</h3>
-    <div class="msgs" id="msgs"><span class="empty">Noch keine Nachrichten.</span></div>
-  </section>
+<section class="card">
+  <div class="row"><h2 style="margin:0">Fertige Clips <span class="sub" id="clipCount"></span></h2>
+    <button class="small" id="openOut">📂 Ordner öffnen</button></div>
+  <div class="clips" id="clips"></div>
+  <p class="empty" id="clipsEmpty">Noch keine Clips. Sie erscheinen hier automatisch, sobald der Bot welche geschnitten hat. Hochladen machst du selbst, z. B. über „Herunterladen“.</p>
+</section>
 
-  <section class="card" id="settings">
-    <h2>Einstellungen</h2>
-    <form id="form" onsubmit="return false"></form>
-    <div class="actions" style="margin-top:12px"><button class="primary" id="bSave">Speichern</button></div>
-  </section>
+<section class="card" id="hlCard" style="display:none">
+  <h2>Das hat der Bot erkannt</h2><div id="peaks"></div>
+</section>
 
-  <section class="card wide">
-    <h2>Erkannte Highlights</h2>
-    <table><thead><tr><th>Zeit</th><th>Score</th><th>Warum</th><th>Aktion</th></tr></thead><tbody id="peaks"></tbody></table>
-    <p class="empty" id="peaksEmpty">Noch nichts erkannt.</p>
-  </section>
+<details><summary>Live-Diagramme und Chat</summary><div class="in">
+  <canvas id="cChat"></canvas><div class="legend" id="legend"></div>
+  <h3>Highlight-Wert (Linie) und Schwelle (gestrichelt)</h3><canvas id="cScore"></canvas>
+  <h3>Chat live</h3><div class="msgs" id="msgs"><span class="empty">Noch keine Nachrichten.</span></div>
+</div></details>
 
-  <section class="card wide">
-    <h2>Fertige Clips <span class="val" id="clipCount"></span></h2>
-    <div class="clips" id="clips"></div>
-    <p class="empty" id="clipsEmpty">Noch keine Clips. Sie landen im Ordner <code>out</code> und erscheinen hier automatisch. Hochladen machst du selbst.</p>
-  </section>
+<details><summary>Erweiterte Einstellungen</summary><div class="in">
+  <form id="form" onsubmit="return false"></form>
+  <button class="small" id="bSave" style="margin-top:12px">Speichern</button>
+</div></details>
 
-  <section class="card wide">
-    <details><summary>Protokoll des Bots</summary><pre id="log"></pre></details>
-  </section>
-</main>
+<details><summary>Protokoll (für die Fehlersuche)</summary><div class="in"><pre class="log" id="log"></pre></div></details>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
 "use strict";
 const $ = id => document.getElementById(id);
-let CFG = null;
-let lastClipSig = "";
+let CFG = null, MODE = "live", lastClipSig = "";
 
 const SCHEMA = [
-  ["Streamer", [
-    ["twitch.channel", "Streamer (Twitch-Name)", "text", {help: "Zum Beispiel gtasty"}],
-  ]],
-  ["Wann ist etwas ein Highlight?", [
+  ["Wie streng ist der Bot?", [
     ["live.threshold", "Schwelle", "range", {min: .3, max: 2.5, step: .05, help: "Niedriger = mehr Clips, höher = nur die stärksten Momente"}],
-    ["detect.weight_chat", "Gewicht Chat", "range", {min: 0, max: 3, step: .1, help: "Wie viel Chat-Ausbrüche (vs. normal) zählen"}],
-    ["detect.weight_audio", "Gewicht Lautstärke", "range", {min: 0, max: 3, step: .1, help: "Lachen und Schreien im Stream"}],
+    ["detect.weight_chat", "Wichtigkeit Chat", "range", {min: 0, max: 3, step: .1, help: "Wie viel Ausbrüche im Chat zählen"}],
+    ["detect.weight_audio", "Wichtigkeit Lautstärke", "range", {min: 0, max: 3, step: .1, help: "Lachen und Schreien im Stream"}],
     ["live.mood_weight", "HAHA / Schock extra", "range", {min: 0, max: 5, step: .5, help: "Wie stark Lach- und Schock-Nachrichten zusätzlich zählen"}],
-    ["detect.min_gap", "Abstand zwischen Clips (s)", "number", {help: "So lange wird nach einem Clip nichts Neues ausgelöst"}],
+    ["detect.min_gap", "Pause zwischen Clips (Sekunden)", "number", {}],
   ]],
-  ["Clip-Länge", [
-    ["detect.pre_roll", "Sekunden davor", "number", {}],
-    ["detect.post_roll", "Sekunden danach", "number", {}],
-    ["detect.min_len", "Minimale Länge (s)", "number", {}],
-    ["detect.max_len", "Maximale Länge (s)", "number", {}],
+  ["Länge der Clips", [
+    ["detect.pre_roll", "Sekunden vor dem Highlight", "number", {}],
+    ["detect.post_roll", "Sekunden nach dem Highlight", "number", {}],
+    ["detect.min_len", "Kürzester Clip (Sekunden)", "number", {}],
+    ["detect.max_len", "Längster Clip (Sekunden)", "number", {}],
   ]],
   ["Aussehen", [
     ["render.layout", "Layout", "select", {options: [["blur", "Gameplay mit unscharfem Hintergrund"], ["facecam", "Facecam oben, Spiel unten"]]}],
-    ["render.subtitles", "Untertitel einbrennen", "check", {}],
-    ["render.font_size", "Schriftgröße", "number", {}],
+    ["render.subtitles", "Untertitel einbauen", "check", {}],
+    ["render.font_size", "Schriftgröße der Untertitel", "number", {}],
   ]],
-  ["Spracherkennung (Whisper)", [
-    ["transcribe.model", "Modell", "select", {options: [["tiny", "tiny (schnell)"], ["base", "base"], ["small", "small (Standard)"], ["medium", "medium (genauer)"], ["large-v3", "large-v3 (beste, braucht GPU)"]]}],
-    ["transcribe.device", "Gerät", "select", {options: [["cpu", "CPU"], ["cuda", "Nvidia-Grafikkarte"]]}],
-    ["transcribe.compute_type", "Rechengenauigkeit", "select", {options: [["int8", "int8 (CPU)"], ["float16", "float16 (GPU)"], ["int8_float16", "int8_float16 (GPU, wenig VRAM)"]]}],
+  ["Untertitel-Erkennung (Whisper)", [
+    ["transcribe.model", "Genauigkeit", "select", {options: [["tiny", "tiny (am schnellsten)"], ["base", "base"], ["small", "small (empfohlen)"], ["medium", "medium (genauer)"], ["large-v3", "large-v3 (am besten, braucht Grafikkarte)"]]}],
+    ["transcribe.device", "Rechnen mit", "select", {options: [["cpu", "Prozessor"], ["cuda", "Nvidia-Grafikkarte (schneller)"]]}],
+    ["transcribe.compute_type", "Rechengenauigkeit", "select", {options: [["int8", "int8 (Prozessor)"], ["float16", "float16 (Grafikkarte)"], ["int8_float16", "int8_float16 (Grafikkarte, wenig Speicher)"]]}],
   ]],
   ["Weiteres", [
     ["live.webhook", "Discord-Webhook (optional)", "text", {help: "Meldet jeden neuen Clip in einen Discord-Kanal"}],
-    ["detect.hype_words", "Wörter, die einen Clip aufwerten", "area", {help: "Durch Komma getrennt, nur für VOD-Analyse und Clip-Bewertung"}],
-  ]],
-  ["Clips-Modus (Zuschauer-Clips)", [
-    ["_days", "Zeitraum (Tage)", "number", {local: 7}],
-    ["_count", "Anzahl Clips", "number", {local: 10}],
+    ["_days", "Clips-Modus: Zeitraum (Tage)", "number", {local: 7}],
+    ["_count", "Clips-Modus: Anzahl", "number", {local: 10}],
   ]],
 ];
 
-function getPath(o, p) { return p.split(".").reduce((a, k) => (a == null ? a : a[k]), o); }
-function setPath(o, p, v) { const ks = p.split("."); const last = ks.pop(); const t = ks.reduce((a, k) => a[k], o); t[last] = v; }
+const getPath = (o, p) => p.split(".").reduce((a, k) => (a == null ? a : a[k]), o);
+function setPath(o, p, v) { const ks = p.split("."); const l = ks.pop(); ks.reduce((a, k) => a[k], o)[l] = v; }
 
 function buildForm() {
   const f = $("form"); f.textContent = "";
   for (const [group, items] of SCHEMA) {
     const h = document.createElement("h3"); h.textContent = group; f.appendChild(h);
     for (const [path, label, type, o] of items) {
-      const row = document.createElement("div"); row.className = "field" + (type === "area" ? " full" : "");
+      const row = document.createElement("div"); row.className = "field";
       const lab = document.createElement("label"); lab.textContent = label; lab.htmlFor = "f_" + path; row.appendChild(lab);
       let el;
-      if (type === "select") {
-        el = document.createElement("select");
-        for (const [v, t] of o.options) { const op = document.createElement("option"); op.value = v; op.textContent = t; el.appendChild(op); }
-      } else if (type === "area") { el = document.createElement("textarea"); el.rows = 3; }
-      else if (type === "check") { el = document.createElement("input"); el.type = "checkbox"; el.style.justifySelf = "end"; }
+      if (type === "select") { el = document.createElement("select");
+        for (const [v, t] of o.options) { const op = document.createElement("option"); op.value = v; op.textContent = t; el.appendChild(op); } }
+      else if (type === "check") { el = document.createElement("input"); el.type = "checkbox"; el.style.justifySelf = "end"; el.style.width = "auto"; }
       else { el = document.createElement("input"); el.type = type === "range" ? "range" : (type === "number" ? "number" : "text");
         if (o.min != null) { el.min = o.min; el.max = o.max; el.step = o.step; } }
       el.id = "f_" + path; el.dataset.path = path; el.dataset.type = type; if (o.local != null) el.dataset.local = o.local;
       row.appendChild(el);
       if (o.help) { const s = document.createElement("small"); s.textContent = o.help; row.appendChild(s); }
-      if (type === "range") { const v = document.createElement("span"); v.className = "val"; v.id = "v_" + path; v.style.gridColumn = "1/-1"; row.appendChild(v);
-        el.addEventListener("input", () => { v.textContent = el.value; }); }
+      if (type === "range") { const v = document.createElement("span"); v.className = "val"; v.id = "v_" + path; row.appendChild(v);
+        el.addEventListener("input", () => { v.textContent = el.value; if (path === "live.threshold") markSens(Number(el.value)); }); }
       f.appendChild(row);
     }
   }
 }
 
 function fillForm(cfg) {
+  $("channel").value = cfg.twitch.channel; markSens(cfg.live.threshold);
   for (const el of document.querySelectorAll("[data-path]")) {
     const p = el.dataset.path; if (el.dataset.local != null) { if (el.value === "") el.value = el.dataset.local; continue; }
-    let v = getPath(cfg, p);
-    if (Array.isArray(v)) v = v.join(", ");
+    let v = getPath(cfg, p); if (Array.isArray(v)) v = v.join(", ");
     if (el.dataset.type === "check") el.checked = !!v; else el.value = v;
     const sv = $("v_" + p); if (sv) sv.textContent = el.value;
   }
@@ -193,144 +228,152 @@ function fillForm(cfg) {
 
 function readForm() {
   const cfg = JSON.parse(JSON.stringify(CFG));
+  cfg.twitch.channel = $("channel").value.trim().replace(/^.*twitch\.tv\//i, "").replace(/[^A-Za-z0-9_]/g, "").toLowerCase();
   for (const el of document.querySelectorAll("[data-path]")) {
-    if (el.dataset.local != null) continue;
-    const t = el.dataset.type; let v;
-    if (t === "check") v = el.checked; else if (t === "number" || t === "range") v = Number(el.value); else v = el.value;
-    setPath(cfg, el.dataset.path, v);
+    if (el.dataset.local != null) continue; const t = el.dataset.type;
+    setPath(cfg, el.dataset.path, t === "check" ? el.checked : (t === "number" || t === "range" ? Number(el.value) : el.value));
   }
   return cfg;
 }
 
+function markSens(v) {
+  let hit = false;
+  for (const b of document.querySelectorAll("#sens button")) { const on = Math.abs(Number(b.dataset.v) - v) < 0.01; b.classList.toggle("on", on); hit = hit || on; }
+}
+
 async function api(path, body) {
   const opt = body === undefined ? {} : {method: "POST", headers: {"Content-Type": "application/json", "X-Clipbot": "1"}, body: JSON.stringify(body)};
-  const r = await fetch(path, opt); return r.json();
+  return (await fetch(path, opt)).json();
 }
-
-function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 2600); }
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 3000); }
 
 async function save(quiet) {
-  const r = await api("/api/config", readForm());
+  const cfg = readForm();
+  if (!cfg.twitch.channel) { toast("Bitte erst den Streamer eintragen."); $("channel").focus(); return false; }
+  const r = await api("/api/config", cfg);
   if (r.error) { toast(r.error); return false; }
-  CFG = r.config; if (!quiet) toast("Gespeichert"); return true;
+  CFG = r.config; $("channel").value = CFG.twitch.channel; if (!quiet) toast("Gespeichert"); return true;
 }
 
-async function start(mode) {
+async function go() {
+  const sensOn = document.querySelector("#sens button.on");
+  if (sensOn) $("f_live.threshold").value = sensOn.dataset.v;
   if (!(await save(true))) return;
   const days = Number(document.querySelector("[data-path=_days]").value) || 7;
   const count = Number(document.querySelector("[data-path=_count]").value) || 10;
-  const r = await api("/api/start", {mode, dry_run: $("dry").checked, days, count});
+  const r = await api("/api/start", {mode: MODE, dry_run: false, days, count});
   toast(r.error || "Gestartet"); poll();
 }
 
 // ---------- Diagramme ----------
-const COLORS = () => { const s = getComputedStyle(document.documentElement); const g = n => s.getPropertyValue(n).trim();
+const COL = () => { const s = getComputedStyle(document.documentElement), g = n => s.getPropertyValue(n).trim();
   return {msg: g("--c-msg"), laugh: g("--c-laugh"), shock: g("--c-shock"), clip: g("--c-clip"), spam: g("--c-spam"), score: g("--c-score"), line: g("--line"), muted: g("--muted")}; };
-const NAMES = {msg: "Nachrichten/s", laugh: "Lachen", shock: "Schock", clip: "Clip-Rufe", spam: "Spam"};
-
+const NAMES = {msg: "Nachrichten pro Sekunde", laugh: "Lachen", shock: "Schock", clip: "Clip-Rufe", spam: "Spam"};
 function setup(c) { const r = devicePixelRatio || 1, w = c.clientWidth, h = c.clientHeight; c.width = w * r; c.height = h * r;
   const x = c.getContext("2d"); x.setTransform(r, 0, 0, r, 0, 0); x.clearRect(0, 0, w, h); return [x, w, h]; }
 
 function drawChat(series) {
-  const [x, w, h] = setup($("cChat")), col = COLORS();
-  const n = series.msg.length; if (!n) return;
-  const top = Math.max(5, ...series.msg) * 1.1, step = w / Math.max(n - 1, 1);
-  x.strokeStyle = col.line; x.lineWidth = 1; x.beginPath(); x.moveTo(0, h - .5); x.lineTo(w, h - .5); x.stroke();
-  x.fillStyle = col.msg; x.globalAlpha = .55;
-  series.msg.forEach((v, i) => { const bh = v / top * (h - 6); x.fillRect(i * step - step / 2, h - bh, Math.max(step, 1), bh); });
-  x.globalAlpha = 1;
-  for (const k of ["laugh", "shock", "clip", "spam"]) {
-    x.strokeStyle = col[k]; x.lineWidth = 2; x.beginPath();
-    series[k].forEach((v, i) => { const y = h - v / top * (h - 6); i ? x.lineTo(i * step, y) : x.moveTo(i * step, y); }); x.stroke();
-  }
-  x.fillStyle = col.muted; x.font = "11px system-ui"; x.fillText("max " + Math.round(top) + "/s", 4, 12);
-  x.fillText("vor " + n + " s", 4, h - 4); x.textAlign = "right"; x.fillText("jetzt", w - 4, h - 4);
+  const cv = $("cChat"); if (!cv.offsetParent) return; const [x, w, h] = setup(cv), col = COL();
+  const n = series.msg.length; if (!n) return; const top = Math.max(5, ...series.msg) * 1.1, step = w / Math.max(n - 1, 1);
+  x.fillStyle = col.msg; x.globalAlpha = .55; series.msg.forEach((v, i) => { const bh = v / top * (h - 6); x.fillRect(i * step - step / 2, h - bh, Math.max(step, 1), bh); }); x.globalAlpha = 1;
+  for (const k of ["laugh", "shock", "clip", "spam"]) { x.strokeStyle = col[k]; x.lineWidth = 2; x.beginPath();
+    series[k].forEach((v, i) => { const y = h - v / top * (h - 6); i ? x.lineTo(i * step, y) : x.moveTo(i * step, y); }); x.stroke(); }
+  x.fillStyle = col.muted; x.font = "11px system-ui"; x.fillText("vor " + n + " s", 4, h - 4); x.textAlign = "right"; x.fillText("jetzt", w - 4, h - 4);
 }
-
 function drawScore(series, thr) {
-  const [x, w, h] = setup($("cScore")), col = COLORS();
-  const s = series.score; if (!s.length) return;
-  const top = Math.max(thr * 1.4, ...s) * 1.05, step = w / Math.max(s.length - 1, 1);
-  const Y = v => h - v / top * (h - 6) - 2;
+  const cv = $("cScore"); if (!cv.offsetParent) return; const [x, w, h] = setup(cv), col = COL();
+  const s = series.score; if (!s.length) return; const top = Math.max(thr * 1.4, ...s) * 1.05, step = w / Math.max(s.length - 1, 1), Y = v => h - v / top * (h - 6) - 2;
   x.strokeStyle = col.muted; x.setLineDash([6, 4]); x.beginPath(); x.moveTo(0, Y(thr)); x.lineTo(w, Y(thr)); x.stroke(); x.setLineDash([]);
-  x.strokeStyle = col.score; x.lineWidth = 2; x.beginPath();
-  s.forEach((v, i) => i ? x.lineTo(i * step, Y(v)) : x.moveTo(0, Y(v))); x.stroke();
-  x.fillStyle = col.muted; x.font = "11px system-ui"; x.fillText("Schwelle " + thr, 4, Math.max(Y(thr) - 4, 12));
+  x.strokeStyle = col.score; x.lineWidth = 2; x.beginPath(); s.forEach((v, i) => i ? x.lineTo(i * step, Y(v)) : x.moveTo(0, Y(v))); x.stroke();
+  x.fillStyle = col.muted; x.font = "11px system-ui"; x.fillText("Schwelle", 4, Math.max(Y(thr) - 4, 12));
 }
-
 function renderLegend(series) {
-  const col = COLORS(), lg = $("legend"); lg.textContent = "";
-  for (const k of Object.keys(NAMES)) {
-    const sum = series[k] ? series[k].slice(-10).reduce((a, b) => a + b, 0) : 0;
-    const s = document.createElement("span"); const i = document.createElement("i"); i.style.background = col[k]; s.appendChild(i);
-    s.appendChild(document.createTextNode(NAMES[k] + " (10 s: " + sum + ")")); lg.appendChild(s);
-  }
+  const col = COL(), lg = $("legend"); lg.textContent = "";
+  for (const k of Object.keys(NAMES)) { const sum = series[k] ? series[k].slice(-10).reduce((a, b) => a + b, 0) : 0;
+    const s = document.createElement("span"), i = document.createElement("i"); i.style.background = col[k]; s.appendChild(i);
+    s.appendChild(document.createTextNode(NAMES[k] + " (letzte 10 s: " + sum + ")")); lg.appendChild(s); }
 }
-
-const TAGNAME = {laugh: "Lachen", shock: "Schock", clip: "Clip", spam: "Spam"};
+const TAG = {laugh: "Lachen", shock: "Schock", clip: "Clip", spam: "Spam"};
 function renderMsgs(msgs) {
   const box = $("msgs"); if (!msgs || !msgs.length) return; box.textContent = "";
-  for (const m of msgs.slice().reverse()) {
-    const d = document.createElement("div"); const t = document.createElement("span"); t.textContent = m.text; d.appendChild(t);
-    for (const g of m.tags) { const c = document.createElement("span"); c.className = "chip " + g; c.textContent = TAGNAME[g] || g; d.appendChild(c); }
-    box.appendChild(d);
-  }
+  for (const m of msgs.slice().reverse()) { const d = document.createElement("div"); d.appendChild(document.createTextNode(m.text));
+    for (const g of m.tags) { const c = document.createElement("span"); c.className = "chip " + g; c.textContent = TAG[g] || g; d.appendChild(c); } box.appendChild(d); }
 }
 
-function renderPeaks(peaks) {
-  const tb = $("peaks"); tb.textContent = ""; $("peaksEmpty").style.display = peaks && peaks.length ? "none" : "";
-  for (const p of (peaks || []).slice().reverse()) {
-    const tr = document.createElement("tr");
-    for (const v of [p.time, p.score, p.reason || "(Lautstärke)", p.action]) { const td = document.createElement("td"); td.textContent = v; tr.appendChild(td); }
-    tb.appendChild(tr);
-  }
-}
-
-const STATES = {waiting_stream: ["Wartet auf Stream", "wait"], collecting: ["Sammelt Daten …", "wait"], watching: ["Beobachtet", "on"], stopped: ["Aus", ""]};
+// ---------- Status in einfachen Worten ----------
+function setStatus(lamp, main, sub) { $("lamp").className = "lamp " + lamp; $("stMain").textContent = main; $("stSub").textContent = sub || ""; }
 
 function render(s) {
-  CFG = CFG || s.config;
-  const st = s.status, running = s.running;
-  let label = "Aus", cls = "";
-  if (running) { const m = st && STATES[st.state]; [label, cls] = m || ["Startet …", "wait"];
-    if (s.mode === "clips") [label, cls] = ["Clips-Modus läuft", "on"]; else if (st && st.chat_only && st.state !== "stopped") label += " (nur Chat)"; }
-  $("badge").textContent = label; $("badge").className = "badge " + cls;
-  $("dotStream").className = "dot" + (st && st.stream_live && running ? " on" : "");
-  $("dotChat").className = "dot" + (st && st.chat_connected && running ? " on" : "");
-  $("bLive").disabled = running; $("bChat").disabled = running; $("bClips").disabled = running; $("bStop").disabled = !running;
+  CFG = CFG || s.config; const st = s.status, run = s.running, ch = (st && st.channel) || (CFG && CFG.twitch.channel) || "";
+  $("go").textContent = run ? "■ Stoppen" : "▶ Starten"; $("go").classList.toggle("stop", run);
+  $("go").dataset.run = run ? "1" : "";
+  for (const el of document.querySelectorAll("#setup input, #modes .mode, #sens button")) { el.style.pointerEvents = run ? "none" : ""; el.style.opacity = run ? .6 : ""; }
+  $("meterBox").style.display = "none"; $("errBox").textContent = "";
+  const lastLog = (s.log || []).slice(-6).join("\n");
+  if (run && s.mode === "clips") {
+    const n = (s.log || []).filter(l => l.includes("[clipbot]")).slice(-1)[0] || "";
+    setStatus("on", "Zuschauer-Clips werden geholt und umgewandelt …", n.replace("[clipbot] ", ""));
+  } else if (run && st) {
+    const co = st.chat_only ? " (Testmodus: es wird nichts geschnitten)" : "";
+    if (st.state === "waiting_stream") setStatus("wait", "Warte, bis " + ch + " live geht …", "Sobald der Stream startet, geht es automatisch los." + co);
+    else if (st.state === "collecting") setStatus("wait", ch + " ist live. Der Bot lernt gerade, was im Chat normal ist …", "Das dauert ein paar Minuten." + co);
+    else setStatus("on", "Der Bot schaut dem Stream von " + ch + " zu.", "Clips bisher: " + (st.clips || 0) + co);
+    if (st.series && st.series.score && st.series.score.length) {
+      const sc = Math.max(...st.series.score.slice(-6)), r = sc / st.threshold, p = Math.min(r, 1.4) / 1.4 * 100;
+      $("meterBox").style.display = ""; $("meter").style.width = p + "%";
+      $("meter").style.background = r >= 1 ? "var(--ok)" : (r >= .75 ? "var(--warn)" : "var(--accent)");
+      $("meterWord").textContent = r >= 1 ? "Highlight!" : (r >= .75 ? "kurz davor" : (r >= .4 ? "lebhaft" : ""));
+    }
+  } else if (run) setStatus("wait", "Startet …", "Beim ersten Mal wird ein Sprachmodell geladen, das kann etwas dauern.");
+  else {
+    setStatus("", "Der Bot ist aus.", "Trage oben einen Streamer ein und drücke Starten.");
+    if (s.exit_code && s.exit_code > 0) {
+      const e = document.createElement("div"); e.className = "alert";
+      const b = document.createElement("b"); b.textContent = "Beim letzten Start ist etwas schiefgelaufen. "; e.appendChild(b);
+      e.appendChild(document.createTextNode("Schicke diesen Text, wenn du Hilfe brauchst:")); const pre = document.createElement("pre"); pre.textContent = lastLog; e.appendChild(pre);
+      $("errBox").appendChild(e); $("lamp").className = "lamp bad";
+    }
+  }
   const series = st && st.series && st.series.msg ? st.series : null;
-  $("stateInfo").textContent = st && st.state === "collecting" ? "– braucht etwas Vorlauf für den Normalwert" : "";
   if (series) { drawChat(series); drawScore(series, st.threshold); renderLegend(series); }
-  renderMsgs(st && st.messages); renderPeaks(st && st.peaks);
+  renderMsgs(st && st.messages);
+  const peaks = (st && st.peaks) || [], box = $("peaks"); $("hlCard").style.display = peaks.length ? "" : "none"; box.textContent = "";
+  for (const p of peaks.slice().reverse().slice(0, 5)) { const d = document.createElement("div"); d.className = "hl";
+    const b = document.createElement("b"); b.textContent = p.time; d.appendChild(b);
+    d.appendChild(document.createTextNode("  " + (p.reason || "Lautstärke-Ausschlag") + "  ·  " + p.action)); box.appendChild(d); }
   $("log").textContent = (s.log || []).join("\n");
 }
 
-async function loadClips() {
-  const items = await api("/api/clips"); const sig = items.map(i => i.url).join("|");
-  if (sig === lastClipSig) return; lastClipSig = sig;
-  const box = $("clips"); box.textContent = ""; $("clipsEmpty").style.display = items.length ? "none" : "";
-  $("clipCount").textContent = items.length ? "(" + items.length + ")" : "";
-  for (const c of items) {
-    const d = document.createElement("div"); d.className = "clip";
-    const v = document.createElement("video"); v.controls = true; v.preload = "metadata"; v.src = c.url + "#t=0.1"; v.playsInline = true; d.appendChild(v);
-    const t = document.createElement("div"); t.className = "t"; t.textContent = c.title || c.file; d.appendChild(t);
-    const m = document.createElement("div"); m.className = "m";
-    m.textContent = [c.time, c.reason, "Ordner: out/" + c.folder].filter(Boolean).join(" · "); d.appendChild(m);
-    const a = document.createElement("a"); a.href = c.url; a.download = c.file; a.textContent = "Herunterladen"; a.className = "m"; d.appendChild(a);
-    box.appendChild(d);
-  }
+async function loadChecks() {
+  const items = await api("/api/check"), bad = items.filter(i => !i.ok), box = $("checks"); box.textContent = "";
+  for (const i of bad) { const d = document.createElement("div"); d.className = "alert";
+    const b = document.createElement("b"); b.textContent = i.text + " fehlt. "; d.appendChild(b); d.appendChild(document.createTextNode(i.fix)); box.appendChild(d); }
+  const g = items.find(i => i.id === "gpu");
+  if (g && /Keine/.test(g.text) && CFG && CFG.transcribe.device === "cuda") { const d = document.createElement("div"); d.className = "alert soft";
+    d.textContent = "In den Einstellungen steht „Nvidia-Grafikkarte“, aber es wurde keine gefunden. Stelle unter Erweitert „Rechnen mit“ auf Prozessor."; box.appendChild(d); }
 }
 
-async function poll() { try { render(await api("/api/state")); } catch (e) { $("badge").textContent = "Keine Verbindung"; } }
+async function loadClips() {
+  const items = await api("/api/clips"), sig = items.map(i => i.url).join("|"); if (sig === lastClipSig) return; lastClipSig = sig;
+  const box = $("clips"); box.textContent = ""; $("clipsEmpty").style.display = items.length ? "none" : ""; $("clipCount").textContent = items.length ? "(" + items.length + ")" : "";
+  for (const c of items) { const d = document.createElement("div"); d.className = "clip";
+    const v = document.createElement("video"); v.controls = true; v.preload = "metadata"; v.src = c.url + "#t=0.1"; v.playsInline = true; d.appendChild(v);
+    const t = document.createElement("div"); t.className = "t"; t.textContent = c.title || c.file; d.appendChild(t);
+    const m = document.createElement("div"); m.className = "m"; m.textContent = [c.time, c.reason].filter(Boolean).join(" · "); d.appendChild(m);
+    const a = document.createElement("a"); a.href = c.url; a.download = c.file; a.textContent = "Herunterladen"; a.className = "m"; d.appendChild(a); box.appendChild(d); }
+}
 
-let formReady = false;
+async function poll() { try { render(await api("/api/state")); } catch (e) { setStatus("bad", "Keine Verbindung zum Programm.", "Läuft das schwarze Fenster (start.bat) noch?"); } }
+
 (async function init() {
   buildForm();
-  const s = await api("/api/state"); CFG = s.config; fillForm(CFG); formReady = true; render(s); loadClips();
+  const s = await api("/api/state"); CFG = s.config; fillForm(CFG); render(s); loadClips(); loadChecks();
   setInterval(poll, 2000); setInterval(loadClips, 8000);
+  for (const b of document.querySelectorAll("#sens button")) b.onclick = () => { $("f_live.threshold").value = b.dataset.v; $("v_live.threshold").textContent = b.dataset.v; markSens(Number(b.dataset.v)); };
+  for (const m of document.querySelectorAll("#modes .mode")) m.onclick = () => { MODE = m.dataset.m; document.querySelectorAll("#modes .mode").forEach(x => x.classList.toggle("on", x === m)); };
+  $("go").onclick = async () => { if ($("go").dataset.run) { await api("/api/stop", {}); toast("Wird beendet … laufende Clips werden noch fertig gemacht."); } else go(); };
   $("bSave").onclick = () => save(false);
-  $("bLive").onclick = () => start("live"); $("bChat").onclick = () => start("chat"); $("bClips").onclick = () => start("clips");
-  $("bStop").onclick = async () => { await api("/api/stop", {}); toast("Wird beendet … (laufende Clips werden fertig gemacht)"); };
+  $("openOut").onclick = async () => { const r = await api("/api/open_out", {}); if (!r.ok) toast("Konnte den Ordner nicht öffnen: " + (r.error || "")); };
   addEventListener("resize", poll);
 })();
 </script>

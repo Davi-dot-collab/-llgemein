@@ -2,7 +2,15 @@
 
 Sucht lustige/virale Momente in Streams und schneidet sie als 9:16-Clips mit Untertiteln. Der Upload (z. B. TikTok) passiert von Hand, das Programm braucht **keine Accounts und keine API-Keys**.
 
-## Oberfläche (empfohlen)
+## Schnellstart (Windows)
+
+1. Python installieren (einmalig, in der PowerShell): `winget install Python.Python.3.12`
+2. Im Ordner `clipbot` **`start.bat` doppelklicken**. Beim ersten Mal richtet es alles ein (ein paar Minuten, installiert auch ffmpeg) und öffnet dann die Seite im Browser. Das schwarze Fenster muss offen bleiben.
+3. Auf der Seite: Streamer eintragen, „Wie viele Clips?“ wählen, **Starten**. Mac/Linux: `./start.sh`.
+
+Unter „Erweiterte Einstellungen“ liegt alles Technische, unter „Protokoll“ die Fehlermeldungen.
+
+## Oberfläche
 
 ```bash
 python -m clipbot ui
